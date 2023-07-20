@@ -89,6 +89,55 @@ router.post("/user/signup", fileUpload(), async (req, res) => {
   }
 });
 
+router.get("/user/:username", async (req, res) => {
+  try {
+    const user = await User.find({ username: req.params.username });
+
+    if (user.length !== 0) {
+      return res.status(200).json({
+        response: true,
+        message: "Votre nom d'utilisateur est déjà utilisé.",
+      });
+    } else {
+      return res.status(200).json({
+        response: false,
+        message: "",
+      });
+    }
+  } catch (error) {
+    if (error.status)
+      return res.status(error.status).json({ message: error.message });
+    else {
+      return res.status(400).json({ message: error.message });
+    }
+  }
+});
+
+// router.get("/user/:id", async (req, res) => {
+//   try {
+//     console.log(req.params.id);
+//     const user = await User.findById(req.params.id);
+//     console.log(user);
+//     if (user.length !== 0) {
+//       return res.status(200).json({
+//         response: true,
+//         message: "Votre nom d'utilisateur est déjà utilisé.",
+//       });
+//     } else {
+//       return res.status(200).json({
+//         response: user,
+//         message: "",
+//       });
+//     }
+//   } catch (error) {
+//     if (error.status)
+//       return res.status(error.status).json({ message: error.message });
+//     else {
+//       return res.status(400).json({ message: error.message });
+//     }
+//   }
+// });
+
 router.post("/user/login", async (req, res) => {
   try {
     if (req.body.mail && req.body.password) {
