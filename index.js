@@ -2,7 +2,15 @@ const express = require("express");
 const app = express();
 require("dotenv").config();
 const cors = require("cors");
-app.use(cors());
+app.use(
+  cors()
+  // {
+  // origin: [
+  //   "http://localhost:5173/",
+  //   "https://gleeful-shortbread-ed3f7f.netlify.app/",
+  // ],
+  // }
+);
 const mongoose = require("mongoose");
 
 mongoose.connect(process.env.MONGODB_URI);

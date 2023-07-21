@@ -20,7 +20,6 @@ const convertToBase64 = (file) => {
 
 router.post("/user/signup", fileUpload(), async (req, res) => {
   try {
-    console.log(req.body);
     if (!req.body.name || !req.body.mail || !req.body.password) {
       throw { message: "Entrée(s) non valide(s)." };
     }
@@ -57,7 +56,7 @@ router.post("/user/signup", fileUpload(), async (req, res) => {
         const randomeNumber = Math.floor(
           Math.random() * avatar.resources.length
         );
-        console.log(randomeNumber);
+
         newUser.avatar = {
           public_id: avatar.resources[randomeNumber].public_id,
           secure_url: avatar.resources[randomeNumber].secure_url,
@@ -77,10 +76,9 @@ router.post("/user/signup", fileUpload(), async (req, res) => {
 
       return res.status(201).json(response);
     } else {
-      throw { message: "Mail déjà utilisé." };
+      throw { status: 409, message: "Mail déjà utilisé." };
     }
   } catch (error) {
-    console.log(error);
     if (error.status)
       return res.status(error.status).json({ message: error.message });
     else {
@@ -94,7 +92,7 @@ router.get("/user/:username", async (req, res) => {
     const user = await User.find({ username: req.params.username });
 
     if (user.length !== 0) {
-      return res.status(200).json({
+      return res.status(409).json({
         response: true,
         message: "Votre nom d'utilisateur est déjà utilisé.",
       });
@@ -115,9 +113,9 @@ router.get("/user/:username", async (req, res) => {
 
 // router.get("/user/:id", async (req, res) => {
 //   try {
-//     console.log(req.params.id);
+//
 //     const user = await User.findById(req.params.id);
-//     console.log(user);
+//
 //     if (user.length !== 0) {
 //       return res.status(200).json({
 //         response: true,
