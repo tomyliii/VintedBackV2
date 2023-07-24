@@ -313,6 +313,7 @@ router.get("/offers", async (req, res) => {
     const filter = {};
 
     const {
+      limit,
       title,
       priceMin,
       priceMax,
@@ -376,12 +377,14 @@ router.get("/offers", async (req, res) => {
     } else {
       fPage = page;
     }
-
-    const limit = 3;
-    const skip = limit * (Number(fPage) - 1);
+    let flimit = 20;
+    if (limit) {
+      flimit = limit;
+    }
+    const skip = flimit * (Number(fPage) - 1);
     const offers = await Offer.find(filter)
       .sort({ product_price: fSort })
-      .limit(3)
+      .limit(flimit)
       .skip(skip)
       .populate("owner", " avatar username -_id")
       .select("-__v");
