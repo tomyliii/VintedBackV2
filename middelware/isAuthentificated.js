@@ -6,7 +6,9 @@ const User = require("../models/User");
 const isAuthentificated = async (req, res, next) => {
   if (req.headers.authorization) {
     const sentToken = req.headers.authorization.replace("Bearer ", "");
-    const findUser = await User.findOne({ token: sentToken });
+    const findUser = await User.findOne({ token: sentToken }).select(
+      "username"
+    );
 
     if (findUser) {
       req.user = findUser;

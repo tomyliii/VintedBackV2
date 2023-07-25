@@ -105,7 +105,7 @@ router.post(
               folder: "/vinted/offers/" + newOffer.id,
             }
           );
-          console.log(result);
+
           newOffer.product_image.image1 = {
             public_id: result.public_id,
             secure_url: result.secure_url,
@@ -310,6 +310,7 @@ router.delete("/offer/delete", isAuthentificated, async (req, res) => {
 
 router.get("/offers", async (req, res) => {
   try {
+    console.log("ok");
     const filter = {};
 
     const {
