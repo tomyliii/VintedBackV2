@@ -29,7 +29,7 @@ router.post("/pay", async (req, res) => {
       const offer = await Offer.findById(req.body.offerId).populate("owner");
       const buyer = await User.findById(req.body.userId);
       const owner = offer.owner;
-
+      console.log(offer, buyer, owner);
       offer.product_state = false;
       offer.history.date_of_purchase = new Date();
       offer.buyer = buyer;
@@ -43,6 +43,7 @@ router.post("/pay", async (req, res) => {
     }
     res.status(200).json(charge);
   } catch (error) {
+    res.json(error);
     if (error.status) {
       res.status(error.status).json({ message: error.message });
     } else {
