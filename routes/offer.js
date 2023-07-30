@@ -409,7 +409,7 @@ router.get("/offer/:id", async (req, res) => {
   try {
     if (req.params.id) {
       const offer = await Offer.findById(req.params.id)
-        .populate("owner", "username avatar")
+        .populate("owner buyer", "username avatar")
         .select("-__v");
 
       if (offer) {
@@ -468,25 +468,27 @@ router.get("/offers/offers", async (req, res) => {
 
 router.get("/offers/all", async (req, res) => {
   try {
-    const offers = await Offer.find().populate("owner").select("-__v");
+    const offers = await Offer.find()
+      .populate("owner", "username avatar")
+      .select("-__v");
 
-    for (let i = 0; i < offers.length; i++) {
-      const buyer = { type: mongoose.Schema.Types.ObjectId, ref: "User" };
-      const product_state = true;
+    // for (let i = 0; i < offers.length; i++) {
+    //   const buyer = { type: mongoose.Schema.Types.ObjectId, ref: "User" };
+    //   const product_state = true;
 
-      const history = {
-        date_of_creation: new Date(),
-        date_of_modification: [],
-        view: 0,
-        date_of_purchase: { type: Date },
-      };
-      Object.assign(offers[i], product_state);
-      Object.assign(offers[i], history);
-      Object.assign(offers[i], buyer);
-      offers[i].markModified(product_state, history);
+    //   const history = {
+    //     date_of_creation: new Date(),
+    //     date_of_modification: [],
+    //     view: 0,
+    //     date_of_purchase: { type: Date },
+    //   };
+    //   Object.assign(offers[i], product_state);
+    //   Object.assign(offers[i], history);
+    //   Object.assign(offers[i], buyer);
+    //   offers[i].markModified(product_state, history);
 
-      await offers[i].save();
-    }
+    //   await offers[i].save();
+    // }
     return res
       .status(200)
       .json({ message: "Voici les offres trouvées.", data: offers });
