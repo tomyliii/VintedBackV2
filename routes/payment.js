@@ -40,8 +40,10 @@ router.post("/pay", async (req, res) => {
         price: req.body.price,
       });
       await offer.save(), newTransction.save();
+      res.status(200).json(charge);
+    } else {
+      res.status(400).json(charge);
     }
-    res.status(200).json(charge);
   } catch (error) {
     res.json(error);
     if (error.status) {
