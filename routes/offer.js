@@ -17,6 +17,7 @@ const isAuthentificated = require("../middelware/isAuthentificated");
 
 const Offer = require("../models/Offer");
 const _ = require("lodash");
+const mongoose = require("mongoose");
 
 const convertToBase64 = (file) => {
   return `data:${file.mimetype};base64,${file.data.toString("base64")}`;
@@ -111,6 +112,7 @@ router.post(
             secure_url: result.secure_url,
           };
         }
+
         await newOffer.save();
         return res
           .status(201)
@@ -139,7 +141,7 @@ router.put("/offer/edit", isAuthentificated, fileUpload(), async (req, res) => {
       throw { message: "Aucune annonce trouvée.", status: 404 };
     }
     const offer = await Offer.findById(req.body.idOffer)
-      .populate("owner", " avatar username -_id")
+      .populate("owner", " avatar username id")
       .select("-__v");
     // crash si mauvais id
 
@@ -245,6 +247,7 @@ router.put("/offer/edit", isAuthentificated, fileUpload(), async (req, res) => {
 
       offer.markModified("product_image");
       offer.markModified("product_details");
+      offer.history.date_of_modification.push(new Date());
       await offer.save();
       return res
         .status(200)
@@ -291,7 +294,9 @@ router.delete("/offer/delete", isAuthentificated, async (req, res) => {
           console.log(result);
         }
       );
+
       await Offer.findByIdAndDelete(req.body.idOffer);
+
       return res.status(200).json({ message: "Offre éffacée." });
     } else {
       throw {
@@ -310,9 +315,8 @@ router.delete("/offer/delete", isAuthentificated, async (req, res) => {
 
 router.get("/offers", async (req, res) => {
   try {
-    console.log("ok");
     const filter = {};
-
+    filter.product_state = true;
     const {
       limit,
       title,
@@ -407,10 +411,14 @@ router.get("/offer/:id", async (req, res) => {
       const offer = await Offer.findById(req.params.id)
         .populate("owner", "username avatar")
         .select("-__v");
+
       if (offer) {
-        return res
-          .status(200)
-          .json({ message: "Voici l'offre trouvée.", data: offer });
+        offer.history.view += 1;
+        await offer.save();
+        return res.status(200).json({
+          message: "Voici l'offre trouvée.",
+          data: offer,
+        });
       } else {
         throw { message: "Offre introuvable. Verifier l'ID.", status: 404 };
       }
@@ -440,7 +448,7 @@ router.get("/offers/offers", async (req, res) => {
     const limit = 20;
     const skip = limit * (Number(fPage) - 1);
 
-    const offers = await Offer.find()
+    const offers = await Offer.find({ product_state: true })
       .populate("owner", "username avatar")
       .select("-__v")
       .limit(limit)
@@ -460,10 +468,25 @@ router.get("/offers/offers", async (req, res) => {
 
 router.get("/offers/all", async (req, res) => {
   try {
-    const offers = await Offer.find()
-      .populate("owner", "username avatar")
-      .select("-__v");
+    const offers = await Offer.find().populate("owner").select("-__v");
 
+    for (let i = 0; i < offers.length; i++) {
+      const buyer = { type: mongoose.Schema.Types.ObjectId, ref: "User" };
+      const product_state = true;
+
+      const history = {
+        date_of_creation: new Date(),
+        date_of_modification: [],
+        view: 0,
+        date_of_purchase: { type: Date },
+      };
+      Object.assign(offers[i], product_state);
+      Object.assign(offers[i], history);
+      Object.assign(offers[i], buyer);
+      offers[i].markModified(product_state, history);
+
+      await offers[i].save();
+    }
     return res
       .status(200)
       .json({ message: "Voici les offres trouvées.", data: offers });
@@ -477,7 +500,9 @@ router.get("/offers/all", async (req, res) => {
 });
 router.get("/offerspopular", async (req, res) => {
   try {
-    const offers = await Offer.find()
+    const offers = await Offer.find({
+      product_state: true,
+    })
       .limit(5)
       .populate("owner", "username avatar")
       .select("-__v");

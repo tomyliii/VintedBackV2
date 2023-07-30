@@ -19,6 +19,7 @@
     "express-fileupload": "^1.4.0",
     "lodash": "^4.17.21",
     "mongoose": "^7.1.1",
+    "stripe": "^12.16.0",
     "uid2": "^1.0.0"
   }
 }

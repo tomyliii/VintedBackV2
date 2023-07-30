@@ -22,6 +22,9 @@ app.use(offerRoutes);
 const userRoutes = require("./routes/user");
 app.use(userRoutes);
 
+const paymentRoutes = require("./routes/payment");
+app.use(paymentRoutes);
+
 app.get("/", (req, res) => {
   try {
     return res.status(200).json("Bienvenue sur le serveur de Vinted.");
