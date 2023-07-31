@@ -453,7 +453,7 @@ router.get("/offers/offers", async (req, res) => {
       .select("-__v")
       .limit(limit)
       .skip(skip);
-    const count = await Offer.countDocuments();
+    const count = await Offer.countDocuments({ product_state: true });
     return res
       .status(200)
       .json({ message: "Voici les offres trouvées.", data: offers, count });
@@ -530,10 +530,10 @@ router.get("/offersofowner/:id", async (req, res) => {
     const owner = {};
     owner._id = offer.owner._id;
 
-    const offers = await Offer.find({ owner })
+    const offers = await Offer.find({ owner, product_state: true })
       .populate("owner", "username avatar _id")
       .select("-__v");
-    const count = await Offer.countDocuments({ owner });
+    const count = await Offer.countDocuments({ owner, product_state: true });
     return res
       .status(200)
       .json({ message: "Voici les offres trouvées.", data: { count, offers } });
