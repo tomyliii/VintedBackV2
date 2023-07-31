@@ -28,7 +28,7 @@ router.post("/pay", async (req, res) => {
       const offer = await Offer.findById(req.body.offerId).populate("owner");
       const buyer = await User.findById(userID);
       const owner = offer.owner;
-      console.log(offer, buyer, owner);
+      console.log("acheteur----------------------------------", buyer);
       offer.product_state = false;
       offer.history.date_of_purchase = new Date();
       offer.buyer = buyer;
