@@ -413,8 +413,10 @@ router.get("/offer/:id", async (req, res) => {
         .select("-__v");
 
       if (offer) {
-        offer.history.view += 1;
-        await offer.save();
+        if (offer.product_state === true) {
+          offer.history.view += 1;
+          await offer.save();
+        }
         return res.status(200).json({
           message: "Voici l'offre trouvée.",
           data: offer,
@@ -468,30 +470,16 @@ router.get("/offers/offers", async (req, res) => {
 
 router.get("/offers/all", async (req, res) => {
   try {
-    const offers = await Offer.find()
+    const offers = await Offer.find({ product_state: true })
       .populate("owner", "username avatar")
       .select("-__v");
 
-    // for (let i = 0; i < offers.length; i++) {
-    //   const buyer = { type: mongoose.Schema.Types.ObjectId, ref: "User" };
-    //   const product_state = true;
-
-    //   const history = {
-    //     date_of_creation: new Date(),
-    //     date_of_modification: [],
-    //     view: 0,
-    //     date_of_purchase: { type: Date },
-    //   };
-    //   Object.assign(offers[i], product_state);
-    //   Object.assign(offers[i], history);
-    //   Object.assign(offers[i], buyer);
-    //   offers[i].markModified(product_state, history);
-
-    //   await offers[i].save();
-    // }
-    return res
-      .status(200)
-      .json({ message: "Voici les offres trouvées.", data: offers });
+    const count = await Offer.countDocuments({ product_state: true });
+    return res.status(200).json({
+      message: "Voici les offres trouvées.",
+      data: offers,
+      count: count,
+    });
   } catch (error) {
     if (error.status)
       return res.status(error.status).json({ message: error.message });
@@ -523,6 +511,8 @@ router.get("/offerspopular", async (req, res) => {
 
 router.get("/offersofowner/:id", async (req, res) => {
   try {
+    console.log("OK");
+
     const offer = await Offer.findById(req.params.id)
       .populate("owner", "username avatar _id")
       .select("-__v");
@@ -534,10 +524,37 @@ router.get("/offersofowner/:id", async (req, res) => {
       .populate("owner", "username avatar _id")
       .select("-__v");
     const count = await Offer.countDocuments({ owner, product_state: true });
+
     return res
       .status(200)
       .json({ message: "Voici les offres trouvées.", data: { count, offers } });
   } catch (error) {
+    console.log(error);
+    if (error.status)
+      return res.status(error.status).json({ message: error.message });
+    else {
+      return res.status(400).json({ message: error.message });
+    }
+  }
+});
+router.get("/offersowner/:id", async (req, res) => {
+  try {
+    const offers = await Offer.find({
+      owner: req.params.id,
+      product_state: true,
+    })
+      .populate("owner", "username avatar _id")
+      .select("-__v");
+    const count = await Offer.countDocuments({
+      owner: req.params.id,
+      product_state: true,
+    });
+    console.log(offers);
+    return res
+      .status(200)
+      .json({ message: "Voici les offres trouvées.", data: { count, offers } });
+  } catch (error) {
+    console.log(error);
     if (error.status)
       return res.status(error.status).json({ message: error.message });
     else {
