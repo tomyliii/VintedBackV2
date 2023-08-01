@@ -10,7 +10,7 @@ router.post("/pay", async (req, res) => {
     const stripeToken = req.body.stripeToken;
     let amount = req.body.price;
     const userID = req.body.userId;
-    console.log(userID);
+
     if (Number.isInteger(amount)) {
       amount = Number(`${amount}00`);
     } else {
@@ -28,7 +28,7 @@ router.post("/pay", async (req, res) => {
       const offer = await Offer.findById(req.body.offerId).populate("owner");
       const buyer = await User.findById(userID);
       const owner = offer.owner;
-      console.log("acheteur----------------------------------", buyer);
+
       offer.product_state = false;
       offer.history.date_of_purchase = new Date();
       offer.buyer = buyer;

@@ -7,6 +7,8 @@ const base64 = require("crypto-js/enc-base64");
 const cloudinary = require("cloudinary").v2;
 const fileUpload = require("express-fileupload");
 const User = require("../models/User");
+const Transaction = require("../models/Transaction");
+const isAuthentificated = require("../middelware/isAuthentificated");
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -164,6 +166,43 @@ router.post("/user/login", async (req, res) => {
         message: "Veuillez saisir une adresse mail et un mot de passe. ",
       };
     }
+  } catch (error) {
+    if (error.status)
+      return res.status(error.status).json({ message: error.message });
+    else {
+      return res.status(400).json({ message: error.message });
+    }
+  }
+});
+
+router.get("/userpurchases", isAuthentificated, async (req, res) => {
+  try {
+    const purschasesTransaction = await Transaction.find({
+      buyer: req.user.id,
+    }).populate(
+      "offer owner",
+      "username avatar  product_name product_details product_image history"
+    );
+
+    res.status(200).json(purschasesTransaction);
+  } catch (error) {
+    if (error.status)
+      return res.status(error.status).json({ message: error.message });
+    else {
+      return res.status(400).json({ message: error.message });
+    }
+  }
+});
+router.get("/usersales", isAuthentificated, async (req, res) => {
+  try {
+    const salesTransaction = await Transaction.find({
+      owner: req.user,
+    }).populate(
+      "offer buyer",
+      "username avatar  product_name product_details product_image history"
+    );
+
+    res.status(200).json(salesTransaction);
   } catch (error) {
     if (error.status)
       return res.status(error.status).json({ message: error.message });
