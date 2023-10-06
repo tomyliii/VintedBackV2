@@ -22,8 +22,8 @@ const convertToBase64 = (file) => {
 
 router.post("/user/signup", fileUpload(), async (req, res) => {
   try {
-    if (!req.body.name || !req.body.mail || !req.body.password) {
-      throw { message: "Entrée(s) non valide(s)." };
+    if (!req.body.username || !req.body.mail || !req.body.password) {
+      throw { message: "Entrée(s) non valide(s) et/ou manquante(s)." };
     }
     if (!(await User.exists({ mail: req.body.mail }))) {
       const psw = req.body.password;
@@ -32,7 +32,7 @@ router.post("/user/signup", fileUpload(), async (req, res) => {
       const token = uid2(16);
 
       const newUser = new User({
-        username: req.body.name,
+        username: req.body.username,
         mail: req.body.mail,
         salt,
         hash,
@@ -91,6 +91,7 @@ router.post("/user/signup", fileUpload(), async (req, res) => {
 
 router.get("/user/:username", async (req, res) => {
   try {
+    console.log("ok username");
     const user = await User.find({ username: req.params.username });
 
     if (user.length !== 0) {

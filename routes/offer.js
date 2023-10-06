@@ -474,6 +474,23 @@ router.get("/offers/all", async (req, res) => {
       .populate("owner", "username avatar")
       .select("-__v");
 
+    // for (let i = 0; i < offers.length; i++) {
+    //   const buyer = { type: mongoose.Schema.Types.ObjectId, ref: "User" };
+    //   const product_state = true;
+
+    //   const history = {
+    //     date_of_creation: new Date(),
+    //     date_of_modification: [],
+    //     view: 0,
+    //     date_of_purchase: { type: Date },
+    //   };
+    //   Object.assign(offers[i], product_state);
+    //   Object.assign(offers[i], history);
+    //   Object.assign(offers[i], buyer);
+    //   offers[i].markModified(product_state, history);
+
+    //   await offers[i].save();
+    // }
     const count = await Offer.countDocuments({ product_state: true });
     return res.status(200).json({
       message: "Voici les offres trouvées.",
